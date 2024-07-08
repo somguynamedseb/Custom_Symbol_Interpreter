@@ -61,9 +61,9 @@ draw_params = dict(matchColor = (0,255,0), # draw matches in green color
  matchesMask = matchesMask, # draw only inliers
  flags = 2)
  
-img3 = cv.drawMatches(img1,kp1,img2,kp2,good,None,**draw_params)
-
-plt.subplot(121),plt.imshow(img2),plt.title('Input')
+# img3 = cv.drawMatches(img1,kp1,img2,kp2,good,None,**draw_params)
+img3  = cv.drawKeypoints(img1, kp1, img2)
+plt.subplot(121),plt.imshow(img3),plt.title('Input')
 plt.subplot(122),plt.imshow(warped),plt.title('Output')
 
 plt.show()

@@ -5,8 +5,8 @@ import time
 
 MIN_MATCH_COUNT = 10
  
-img1 = cv.imread('testqr.png', cv.IMREAD_GRAYSCALE) # queryImage
-img2 = cv.imread('WIN_20240708_09_37_43_Pro.png', cv.IMREAD_GRAYSCALE) # trainImage
+img1 = cv.imread('testqr.png', cv.IMREAD_GRAYSCALE) # queryImage ##TODO: hardcode this into a file for processing over head
+img2 = cv.imread('WIN_20240708_09_37_43_Pro.png', cv.IMREAD_GRAYSCALE) # trainImage  #TODO:get CUDA setup for faster ORB
 warped = None
 
 
