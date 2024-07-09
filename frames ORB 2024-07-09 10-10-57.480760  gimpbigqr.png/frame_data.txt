@@ -1,0 +1,3 @@
+Frame count: 1301 
+Frames Processed: 539 
+img used: gimpbigqr.png 

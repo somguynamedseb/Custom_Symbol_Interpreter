@@ -1,0 +1,3 @@
+Frame count: 1301 
+Frames Processed: 214 
+img used: croppedqr.png 

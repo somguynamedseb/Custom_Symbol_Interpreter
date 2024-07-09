@@ -1,0 +1,3 @@
+Frame count: 1301 
+Frames Processed: 217 
+img used: testqr.png 

@@ -1,0 +1,3 @@
+Frame count: 1301 
+Frames Processed: 761 
+img used: pdfqr.png 

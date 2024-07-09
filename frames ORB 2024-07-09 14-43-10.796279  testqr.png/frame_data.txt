@@ -1,0 +1,4 @@
+testing to zero theshing and sharpeningMatching Threashold = 6Frame count: 1301 
+Frames Processed: 222 
+img used: testqr.png 
+Processing time = 104535.26163101196 ms
