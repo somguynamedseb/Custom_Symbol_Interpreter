@@ -35,27 +35,42 @@ def printProgressBar (iteration, total, prefix = '', suffix = '', decimals = 1, 
 
 # setup ORB PROCESSING and FLANN parameters
 # Create the ORB instance
-orb = cv.ORB_create()
 
+initialdectector = cv.ORB_create(nfeatures = 20, scaleFactor = 1.2, nlevels = 2, edgeThreshold = 1, firstLevel = 0, WTA_K = 2, scoreType = cv.ORB_HARRIS_SCORE, patchSize = 10, fastThreshold = 100)
+detector = cv.ORB_create(nfeatures = 200, scaleFactor = 1.5, nlevels = 4, edgeThreshold = 100, firstLevel = 0, WTA_K = 2, scoreType = cv.ORB_HARRIS_SCORE, patchSize = 10, fastThreshold = 100)
+
+# detector = cv.SIFT_create()
 # setting up parameters and orb/flann matcher instances
-MIN_MATCH_COUNT = 10
-orb_test = 'IDqr.png'
+MIN_MATCH_COUNT = 7
+orb_test = 'april tag.png'
 
 img1 = cv.imread(orb_test, cv.IMREAD_GRAYSCALE) # queryImage ##TODO: hardcode this into a file for processing over head
-kp1, des1 = orb.detectAndCompute(img1,None)
-FLANN_INDEX_LSH = 6
+ret,img1 = cv.threshold(img1,100,255,cv.THRESH_BINARY)
+kp1, des1 = initialdectector.detectAndCompute(img1,None)
+# kp1 = fast.detect(img1,None)
+h0 = int(img1.shape[0])
+w0 = int(img1.shape[1])
+print(h0,w0)
+img2 =  cv.drawKeypoints(img1, kp1, None, flags=cv.DRAW_MATCHES_FLAGS_DRAW_RICH_KEYPOINTS)
+cv.namedWindow('img2',cv.WINDOW_NORMAL)
+cv.resizeWindow('img2', w0,h0)
+
+cv.imshow("img2", img2)
+
+FLANN_INDEX_KDTREE =1 ##SIFT
+FLANN_INDEX_LSH = 6 ##ORB
 index_params= dict(algorithm = FLANN_INDEX_LSH,
                    table_number = 6,         # was 12
-                   key_size = 12,            # was 20
+                   key_size = 10,            # was 20
                    multi_probe_level = 1)    # was 2
-search_params = dict(checks = 50)
+search_params = dict(checks = 100)
 flann = cv.FlannBasedMatcher(index_params, search_params)
 
 # Create the sharpening kernel 
 kernel = np.array([[0, -1, 0], [-1, 5, -1], [0, -1, 0]]) 
 
 # setup directories and video capture
-vid = cv.VideoCapture('drone qr test.mp4')
+vid = cv.VideoCapture('april test.mp4')
 ret, frame = vid.read()
 h = int(frame.shape[0]/2)
 w = int(frame.shape[1]/2)
@@ -66,32 +81,37 @@ cv.namedWindow('BWframe',cv.WINDOW_NORMAL)
 cv.resizeWindow('BWframe', w,h)
 
 
+
 #initialize performance variables
 frame_count = 0
 frames_good = 0
 while True:
-
+    if cv.waitKey(1) & 0xFF == ord('q'):
+        break
+    
     ret, frame = vid.read()  
-    printProgressBar(frame_count, 1301, prefix = 'Progress:', suffix = 'Complete', length = 50)  
     # Sharpen the image 
     try: ##put image processing in try block to catch errors and video ending easily
         grey = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
         processed_frame = grey
         # processed_frame = cv.filter2D(processed_frame, -1, kernel) 
-        # ret,processed_frame = cv.threshold(processed_frame,140,255,cv.THRESH_TOZERO)
+        # ret,processed_frame = cv.threshold(processed_frame,100,255,cv.THRESH_TOZERO)
+        ret,processed_frame = cv.threshold(processed_frame,100,255,cv.THRESH_BINARY)
+        
     except:
         print("done")
         break
         
     frame_count += 1
-    kp2, des2 = orb.detectAndCompute(processed_frame,None)
+    kp2, des2 = detector.detectAndCompute(processed_frame,None)
     matches = flann.knnMatch(des1,des2,k=2)
-    
+    matches = [match for match in matches if len(match) == 2] ## sometimes knn match returns single point instead of the normal pair
     # cv.imshow('frame', frame)
     try:
-        goodq = []
+        good = []
         for m,n in matches:
             # store all the good matches as per Lowe's ratio test.
+            # print(m.distance, n.distance)
             if m.distance < 0.7*n.distance:
                 good.append(m)
         if len(good)>=MIN_MATCH_COUNT:
@@ -108,22 +128,28 @@ while True:
             
             end = time.time()
             # cv.imshow('qr', warped)
-            frame = cv.drawKeypoints(frame, kp2, None, color=(0,255,0), flags=0)
+            # frame = cv.drawKeypoints(frame, kp2, None, color=(0,255,0), flags=0)
             frame = cv.polylines(frame,[np.int32(dst)],True,255,3, cv.LINE_AA)
-            processed_frame = cv.drawKeypoints(processed_frame, kp2, None, color=(0,255,0), flags=0)
-            processed_frame = cv.polylines(processed_frame,[np.int32(dst)],True,255,3, cv.LINE_AA)
-            
-            good = []
+            # processed_frame = cv.drawKeypoints(processed_frame, kp2, None, color=(0,255,0), flags=0)
+            # processed_frame = cv.polylines(processed_frame,[np.int32(dst)],True,255,3, cv.LINE_AA)
+            print(str(len(matches))+ "    "+ str(len(good)))
+            frame = cv.drawKeypoints(frame, kp2, None, color=(0,255,0), flags=0)
+            cv.imshow("frame", frame)
+            # good = []
         else:   
             # print( "Not enough matches are found - {}/{}".format(len(good), MIN_MATCH_COUNT) )
-            good = []
-            
+            # good = []
+            pass
+        print(str(len(matches))+ "    "+ str(len(good)))
     except:
         # cv.imshow("raw", frame)
-        good = []
-    cv.imshow("BWframe",processed_frame)
-    cv.imshow("frame", frame)
+        # good = []
+        pass
+
+    processed_frame = cv.drawKeypoints(processed_frame, kp2, None, color=(0,255,0), flags=0)
     
-    if cv.waitKey(1) & 0xFF == ord('q'):
-        break
+    cv.imshow("BWframe",processed_frame)
+
+    
+    
 

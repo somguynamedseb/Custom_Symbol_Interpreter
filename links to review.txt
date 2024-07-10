@@ -1,7 +1,0 @@
-https://docs.opencv.org/4.x/d3/db4/tutorial_py_watershed.html
-
-https://docs.opencv.org/4.x/db/d27/tutorial_py_table_of_contents_feature2d.html
-
-https://docs.opencv.org/4.x/d4/dc6/tutorial_py_template_matching.html
-
-https://docs.opencv.org/4.x/da/d6e/tutorial_py_geometric_transformations.html
